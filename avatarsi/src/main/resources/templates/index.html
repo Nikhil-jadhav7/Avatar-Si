@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Avatar SI - Your AI Study Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <header>
+        <a href="/" class="brand">Avatar SI</a>
+        <nav>
+            <a href="/" class="active">Dashboard</a>
+            <a href="/documents">Documents</a>
+            <a href="/search">AI Search</a>
+            <a href="/study-plans">Study Plans</a>
+            <a href="/youtube">YouTube Links</a>
+        </nav>
+    </header>
+    
+    <main class="animate-fade-in">
+        <div class="glass-card" style="text-align: center; padding: 4rem 2rem;">
+            <h1 style="font-size: 3rem; margin-bottom: 1rem; background: linear-gradient(to right, #60A5FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome to Avatar SI</h1>
+            <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem;">Supercharge your learning with AI-generated notes, custom study plans, and semantic search.</p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
+                <input type="file" id="hiddenFileInput" accept=".pdf,.doc,.docx,.txt" style="display: none;" />
+                <button type="button" class="btn" id="uploadNotesBtn" style="margin-bottom: 0;">Upload Notes</button>
+                <a href="/study-plans" class="btn" style="background: var(--secondary); margin-bottom: 0;">Create Study Plan</a>
+            </div>
+            <div id="uploadStatus" style="margin-top: 1rem; font-size: 1rem; font-weight: 500; display: none;"></div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+            <div class="glass-card">
+                <h2>🚀 AI Search (RAG)</h2>
+                <p style="color: var(--text-muted);">Search through all your uploaded materials. Our AI instantly finds the relevant sections and presents them directly.</p>
+                <a href="/search" class="btn" style="margin-top: 1rem;">Try Search</a>
+            </div>
+            
+            <div class="glass-card">
+                <h2>📺 Smart YouTube Suggestions</h2>
+                <p style="color: var(--text-muted);">Struggling with a topic? Let Avatar SI recommend the best curated video tutorials for you.</p>
+                <a href="/youtube" class="btn" style="margin-top: 1rem;">Get Recommendations</a>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spin-icon { display: inline-block; animation: spin 1s linear infinite; }
+    </style>
+    <script>
+        const uploadBtn = document.getElementById('uploadNotesBtn');
+        const fileInput = document.getElementById('hiddenFileInput');
+        const statusDiv = document.getElementById('uploadStatus');
+
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async () => {
+            if (fileInput.files.length === 0) return;
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = 'Uploading... <span class="spin-icon">⏳</span>';
+            statusDiv.style.display = 'none';
+            statusDiv.style.color = '#10B981';
+
+            try {
+                const response = await fetch('/api/notes/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                statusDiv.style.display = 'block';
+                if (response.ok) {
+                    statusDiv.innerHTML = `✅ ${result.message} <a href="/documents" style="color: #60A5FA; text-decoration: underline; margin-left: 0.5rem;">View Notes</a>`;
+                } else {
+                    statusDiv.style.color = '#ef4444';
+                    statusDiv.innerHTML = `❌ Error: ${result.message}`;
+                }
+            } catch (error) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.color = '#ef4444';
+                statusDiv.innerHTML = `❌ Network error occurred. Please try again.`;
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = 'Upload Notes';
+                fileInput.value = ''; // Reset input so the same file can be uploaded again if needed
+            }
+        });
+    </script>
+</body>
+</html>

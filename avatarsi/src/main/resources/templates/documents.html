@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Documents - Avatar SI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <header>
+        <a href="/" class="brand">Avatar SI</a>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/documents" class="active">Documents</a>
+            <a href="/search">AI Search</a>
+            <a href="/study-plans">Study Plans</a>
+            <a href="/youtube">YouTube Links</a>
+        </nav>
+    </header>
+    
+    <main class="animate-fade-in">
+        <div class="glass-card">
+            <h2>Upload Study Material</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Upload PDFs or Text files. Avatar SI will automatically parse and summarize them for you.</p>
+            
+            <form action="/documents/upload" method="post" enctype="multipart/form-data" style="display: flex; gap: 1rem; align-items: center;">
+                <input type="file" name="file" required style="margin-bottom: 0; max-width: 400px;">
+                <button type="submit" class="btn">Upload & Process</button>
+            </form>
+            
+            <div th:if="${error}" style="color: #ef4444; margin-top: 1rem;">
+                <p th:text="${error}"></p>
+            </div>
+        </div>
+        
+        <div class="glass-card">
+            <h2>My Uploaded Documents</h2>
+            <div th:if="${documents.empty}">
+                <p style="color: var(--text-muted);">No documents uploaded yet. Upload one above to get started!</p>
+            </div>
+            
+            <div th:each="doc : ${documents}" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                <h3 th:text="${doc.filename}" style="color: #A78BFA;"></h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Uploaded on: <span th:text="${#temporals.format(doc.uploadedAt, 'dd-MMM-yyyy HH:mm')}"></span></p>
+                
+                <h4 style="margin-top: 1rem; font-size: 1rem;">✨ AI Summary & Short Notes:</h4>
+                <div class="summary-box" th:text="${doc.summary}"></div>
+                
+                <div style="margin-top: 1rem;">
+                    <a th:href="@{/youtube(topic=${#strings.replace(#strings.replace(doc.filename, '.pdf', ''), '.txt', '')})}" class="btn" style="background: #ef4444; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <span>▶️</span> Get Video Recommendations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
